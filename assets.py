@@ -133,24 +133,51 @@ class Board:
         Returns a list of valid moves. Each move is a tuple of (start, end)
         '''
         moves = []
-        # Move last element to top row
-        last_elements = [(i, Board._find_last(self.board[:,i])) for i in range(8)]
-        last_elements = [element for element in last_elements if element[1]!=0] # Non empty column
-        empty_caches = [(0,0), (0,1), (0,2)]
-        empty_caches = [cache for cache in empty_caches if self.board[cache]==0] # empty cache
+
+        # Generate reused info about board
+        last_elements = [(Board._find_last(self.board[:,i]), i) for i in range(8)]
+        empty_columns = [element[1] for element in last_elements if element[0]==0]
+        last_elements = [element for element in last_elements if element[0]!=0] # Non empty column
+
+        caches = [(0,0), (0,1), (0,2)]
+        full_caches = [cache for cache in caches if self.board[cache]!=0] # full cache
+        empty_caches = [cache for cache in caches if self.board[cache]==0] # empty cache
+
+        # Move last element to empty cache
         for element in last_elements:
             for cache in empty_caches:
                 moves.append((element, cache))
         
-        # To be completed to include other legal moves
+        # Move last element to discard pile
+        for element in last_elements:
+            if self.board[element] not in range(3,30):
+                continue
+            # the card can connect to the corresponding discard pile
+            if self.board[0,5+self.board[element]%3]//3 == self.board[element]//3-1:
+                moves.append((element, (0,5+self.board[element]%3)))
+        
+        # Move cache to empty column
+        for cache in full_caches:
+            for column in empty_columns:
+                moves.append((cache, (1, column)))
 
+        # Move cache to connecting tail
+
+        # Move cache to discard pile
+        
+        # Move any head to empty column
+    
+        # Move any head to connecting tail
+                
+        # Collect four special cards
+                
         return moves
 
 
 
 if __name__ == '__main__':
     board = Board(status='sorted')
-    board.board[0][0] = -4
+    board.board[0][0] = -1
     print(board)
     print(board.board)
     print('\n')
