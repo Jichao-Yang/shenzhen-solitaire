@@ -136,7 +136,7 @@ class Board:
 
     def valid_moves(self):
         '''
-        Returns a list of valid moves. Each move is a tuple of (start, end) except collecting special cards,
+        Returns a list of valid manual moves. Each move is a tuple of (start, end) except collecting special cards,
         which is an int of value -1,-2,-3.
         '''
         # Generate reused info about board
