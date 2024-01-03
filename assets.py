@@ -33,7 +33,8 @@ class Board:
             self.board[1:4, 3] = [-1, -2, -3]
             self.board[1:4, 4] = [-1, -2, -3]
             self.board[1:4, 5] = [-1, -2, -3]
-            self.board[1, 6] = 1
+            self.board[1:4, 6] = [-1, -2, -3]
+            self.board[1, 7] = 1
         elif status != 'empty':
             raise ValueError('Invalid status: ' + status)
 
@@ -124,30 +125,46 @@ class Board:
         Checks if the head can connect behind the tail
         tail, head (int): card IDs
         '''
+        # Special cards
+        if tail not in range(0,30) or head not in range(0,30):
+            return False
+        # Normal cards
         if (tail//3-1 == head//3) and (tail%3 != head%3):
             return True
-        return False
+        else:
+            return False
 
     def valid_moves(self):
         '''
-        Returns a list of valid moves. Each move is a tuple of (start, end)
+        Returns a list of valid moves. Each move is a tuple of (start, end) except collecting special cards,
+        which is an int of value -1,-2,-3.
         '''
-        moves = []
-
         # Generate reused info about board
+        # Last elements
         last_elements = [(Board._find_last(self.board[:,i]), i) for i in range(8)]
         empty_columns = [element[1] for element in last_elements if element[0]==0]
         last_elements = [element for element in last_elements if element[0]!=0] # Non empty column
-
+        # Top rows
         caches = [(0,0), (0,1), (0,2)]
         full_caches = [cache for cache in caches if self.board[cache]!=0] # full cache
         empty_caches = [cache for cache in caches if self.board[cache]==0] # empty cache
-
+        # heads
+        max_heads = [(Board._find_head(self.board[:,i]), i) for i in range(8)]
+        max_heads = [head for head in max_heads if head[0]!=0]
+        # Every item below a head can also be a head
+        heads = []
+        for max_head in max_heads:
+            for i in range(max_head[0], 14):
+                if self.board[i, max_head[1]] == 0:
+                    break
+                heads.append((i, max_head[1]))
+        
+        # Generate valid moves
+        moves = []
         # Move last element to empty cache
         for element in last_elements:
             for cache in empty_caches:
                 moves.append((element, cache))
-        
         # Move last element to discard pile
         for element in last_elements:
             if self.board[element] not in range(3,30):
@@ -155,31 +172,48 @@ class Board:
             # the card can connect to the corresponding discard pile
             if self.board[0,5+self.board[element]%3]//3 == self.board[element]//3-1:
                 moves.append((element, (0,5+self.board[element]%3)))
-        
         # Move cache to empty column
         for cache in full_caches:
             for column in empty_columns:
                 moves.append((cache, (1, column)))
-
         # Move cache to connecting tail
-
+        for cache in full_caches:
+            for tail in last_elements:
+                if Board._can_connect(self.board[tail], self.board[cache]):
+                    moves.append((cache, (tail[0]+1, tail[1])))
         # Move cache to discard pile
-        
+        for cache in full_caches:
+            if self.board[cache] not in range(3,30):
+                continue
+            # the card can connect to the corresponding discard pile
+            if self.board[0,5+self.board[cache]%3]//3 == self.board[cache]//3-1:
+                moves.append((cache, (0,5+self.board[cache]%3)))
         # Move any head to empty column
-    
+        for head in heads:
+            for column in empty_columns:
+                moves.append((head, (1, column)))
         # Move any head to connecting tail
-                
+        for head in heads:
+            for tail in last_elements:
+                if Board._can_connect(self.board[tail], self.board[head]):
+                    moves.append((head, (tail[0]+1, tail[1])))
         # Collect four special cards
-                
+        vals = [self.board[element] for element in last_elements] + [self.board[cache] for cache in caches]
+        for val in range(-3,0):
+            if vals.count(val) == 4:
+                moves.append(val)
+
         return moves
 
 
 
 if __name__ == '__main__':
     board = Board(status='sorted')
-    board.board[0][0] = -1
+    board.board[9][0:3] = [0,0,0]
+    board.board[0][0:3] = [5,4,3]
     print(board)
     print(board.board)
     print('\n')
 
     print(board.valid_moves())
+    # print(Board._find_head(board.board[:,6]))
