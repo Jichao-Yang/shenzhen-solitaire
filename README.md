@@ -16,9 +16,12 @@ not sure what this is about yet, still under development
 * Special Cards
     * 中=-1, 发=-2, 白=-3, 花=1, empty=0
 * Board structure
-    * 5*8 matrix to represent board
+    * 14*8 matrix to represent board\
+        * consider the longest column: 5 cards dealt ending with 9, and then 8-1 following behind. Together with the first row for cache the column number is 14.
     * 7 element list to represent top row
     * If a 中 is just put on the top row it is represented by -1. If four 中 is collected on the top row it is represented by -4 (-1*4). This can be quickly checked by value//4==0.
+* Other terms
+    * A `head` to `tail` is a sequence of cards from a larger number to a smaller number in one column, with varying colors. `head` and `tail` represents the position of the largest and smallest card in the sequence, respectively. 
 
 ## Moves
 * Operations
@@ -29,6 +32,8 @@ not sure what this is about yet, still under development
     * Forming a new head to tail: length of the connection
     * Stacking four 中发白: some constant C1
     * Making an empty column: some constant C2
+    * If a board returns to a previous board state in the tree, penalize with some large negative constant C0
+    * If a board has no valid operations, penalize with some large negative constant C0
 * Algorithm
     * Traverses a tree of boards connected by operations up to a certain depth n, pick board with largest sum of operations
 
