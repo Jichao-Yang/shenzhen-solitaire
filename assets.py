@@ -31,24 +31,31 @@ class Board:
         Print the colored value of card given ID
         '''
         colors = ['red', 'green', 'black']
-        if ID in range(3, 30): # Normal cards
+        specials = ['中', '發', '白']
+
+        # Empty cards
+        if ID == 0:
+            return ' '
+
+        # Normal cards
+        if ID in range(3, 30):
             return colored(str(ID//3), colors[ID%3], attrs=['bold'])
-        elif ID == -1:
-            return colored('中', 'red')
-        elif ID == -2:
-            return colored('發', 'green')
-        elif ID == -3:
-            return colored('白', 'black')
+        
+        # Special cards
+        if ID in range(-3, 0):
+            return colored(specials[-ID-1], colors[-ID-1])
         elif ID == 1:
             return '🌸'
-        elif ID == 0:
-            return ' '
+        
+        # Pile of cards
+        if ID < 0 and ID//4 != 0:
+            return colored(specials[-ID//4-1] + '*4', colors[-ID//4-1])
             
     def __repr__(self):
         '''
         Print the board
         '''
-        text = ''
+        text = '-'*60 + '\n'
         # print the first line
         for i in range(8):
             text += Board.print_card(self.board[0][i])
@@ -66,4 +73,6 @@ class Board:
 if __name__ == '__main__':
     board = Board()
     board.randomize()
+    board.board[0][0] = -4
+    board.board[0][1] = -8
     print(board)
