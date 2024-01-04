@@ -205,12 +205,31 @@ class Board:
 
         return moves
 
+    def auto_moves(self):
+        '''
+        Returns the list of automatic moves, in the order of their execution,
+        given the current status of the board.
+        '''
+        curr_board = self.board.copy()
+        moves = []
+        # Move until no more moves can be made
+        while True:
+            # If flower can be moved to cache
+            flower_i = np.where(curr_board==1)[0][0]
+            flower_j = np.where(curr_board==1)[1][0]
+            if curr_board[flower_i+1, flower_j] == 0: # if flower is the last item
+                moves.append(((flower_i, flower_j), (0,4))) # move flower to cache
+                curr_board[flower_i, flower_j] = 0
+                curr_board[0,4] = 1
+                continue
+            # If cards of small value can be moved to discard pile
+            # to be completed
 
 
 if __name__ == '__main__':
     board = Board(status='sorted')
     board.board[9][0:3] = [0,0,0]
-    board.board[0][0:3] = [5,4,3]
+    board.board[0][0:3] = [5,4,3] 
     print(board)
     print(board.board)
     print('\n')
